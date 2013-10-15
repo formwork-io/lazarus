@@ -2,8 +2,8 @@
 lazarus
 =======
 
-.. image:: https://badge.fury.io/py/nbargnesi/lazarus.png
-    :target: http://badge.fury.io/py/nbargnesi/lazarus
+.. image:: https://badge.fury.io/py/lazarus.png
+    :target: http://badge.fury.io/py/lazarus
     
 .. image:: https://travis-ci.org/nbargnesi/lazarus.png?branch=master
         :target: https://travis-ci.org/nbargnesi/lazarus
