@@ -1,0 +1,7 @@
+build
+dist
+lazarus.egg-info
+nosetests.xml
+lazarus/__pycache__
+*.pyc
+
