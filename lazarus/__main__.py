@@ -25,16 +25,26 @@ else:
 
 sys.stdout.write('Checking for pyinotify... ')
 try:
-    from pyinotify import (
-        ProcessEvent,
-        WatchManager,
-        Notifier,
-        IN_MODIFY,
-        IN_CLOSE_WRITE,
-        IN_CREATE,
-        IN_MOVED_TO
-    )
+    import pyinotify
     print('yes')
+
+    sys.stdout.write('Checking pyinotify API compatibility... ')
+    reqs = [
+        'ProcessEvent',
+        'WatchManager',
+        'Notifier',
+        'IN_MODIFY',
+        'IN_CLOSE_WRITE',
+        'IN_CREATE',
+        'IN_MOVED_TO'
+    ]
+    mod = dir(pyinotify)
+    if all([req in mod for req in reqs]):
+        print('yes')
+    else:
+        print('no')
+        compat = False
+
 except ImportError as ie:
     print('no (%s)' % str(ie))
     compat = False

@@ -8,7 +8,7 @@ echo "Running pyflakes check."
 
 PYFLAKES_OPTS=""
 
-pyflakes $PYFLAKES_OPTS $(find -name \*.py)
+pyflakes $PYFLAKES_OPTS $(find -name *.py)
 PYFLAKES_RC=$?
 
 if [ ${PYFLAKES_RC} -eq 1 ]; then

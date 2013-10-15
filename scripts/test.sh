@@ -9,5 +9,9 @@ NOSE_OPTS="--with-xunit "
 NOSE_OPTS+="--nocapture "
 NOSE_OPTS+="--with-doctest "
 NOSE_OPTS+="--doctest-options=+ELLIPSIS "
+NOSE_OPTS+="--with-coverage "
+NOSE_OPTS+="--cover-package=lazarus "
+NOSE_OPTS+="--cover-tests "
+NOSE_OPTS+=" --cover-erase "
 
-nosetests $NOSE_OPTS -v
+PYTHONPATH=. nosetests $NOSE_OPTS -v

@@ -5,7 +5,9 @@ Progress doesn't come from early risers - progress is made by lazy men looking
 for easier ways to do things.
 '''
 
+__version__ = '0.1'
 import os
+import sys
 from . import _util
 from . import _threading
 _active = False
@@ -14,6 +16,19 @@ _pollthread = None
 _mgr = None
 _notifier = None
 _as_list = lambda x: list(x) if not isinstance(x, list) else x
+
+
+def check_platform():
+    '''Checks the platform is Linux.
+
+    For example:
+
+        >>> check_platform()
+    '''
+    platform = sys.platform
+    if not platform.startswith('linux'):
+        msg = '%s: unsupported platform'
+        raise RuntimeError(msg % platform)
 
 
 def _activate():
@@ -55,7 +70,7 @@ def poll_restart():
 def default(restart_cb=None):
     '''Sets up lazarus in default mode.
 
-    See the :ref:`default` function for a more powerful mode of use.
+    See the :py:func:`custom` function for a more powerful mode of use.
 
     The default mode of lazarus is to watch all modules rooted at
     ``PYTHONPATH`` for changes and restart when they take place.
@@ -68,7 +83,9 @@ def default(restart_cb=None):
 
         >>> import lazarus
         >>> lazarus.default()
+        >>> lazarus.stop()
     '''
+    check_platform()
     if _active:
         msg = 'lazarus is already active'
         raise RuntimeWarning(msg)
@@ -123,7 +140,7 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
            restart_cb=None):
     '''Sets up lazarus in custom mode.
 
-    See the :ref:`default` function for a simpler mode of use.
+    See the :py:func:`default` function for a simpler mode of use.
 
     The custom mode of lazarus is to watch all modules rooted at any of the
     source paths provided for changes and restart when they take place.
@@ -150,7 +167,8 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
         >>> def cleanup():
         ...     pass
         >>> import lazarus
-        >>> lazarus.custom(os.getenv('PYTHONPATH'), restart_cb=cleanup)
+        >>> lazarus.custom(os.curdir, restart_cb=cleanup)
+        >>> lazarus.stop()
 
     An example of avoiding restarts when any ``__main__.py`` changes:
 
@@ -159,8 +177,10 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
         ...         return False
         ...     return True
         >>> import lazarus
-        >>> lazarus.custom(os.getenv('PYTHONPATH'), event_cb=skip_main)
+        >>> lazarus.custom(os.curdir, event_cb=skip_main)
+        >>> lazarus.stop()
     '''
+    check_platform()
     if _active:
         msg = 'lazarus is already active'
         raise RuntimeWarning(msg)
@@ -218,3 +238,17 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
         _mgr.add_watch(srcpath, evmask, **kwargs)
     _activate()
     _pollthread.start()
+
+
+def stop():
+    '''Stops lazarus, regardless of which mode it was started in.
+
+    For example:
+
+        >>> import lazarus
+        >>> lazarus.default()
+        >>> lazarus.stop()
+    '''
+    _pollthread.stop()
+    _mgr.close()
+    _deactivate()
