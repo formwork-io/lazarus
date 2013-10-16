@@ -109,7 +109,7 @@ setup(
         'pyflakes': Pyflakes,
         'docs': Docs,
         'test': Test,
-        'check': Check
+        'allchecks': Check
     },
     name=name,
     packages=packages,
