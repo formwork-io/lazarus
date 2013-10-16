@@ -8,8 +8,8 @@ lazarus
 .. image:: https://travis-ci.org/nbargnesi/lazarus.png?branch=master
         :target: https://travis-ci.org/nbargnesi/lazarus
 
-.. image:: https://pypip.in/d/nbargnesi/lazarus/badge.png
-        :target: https://crate.io/packages/nbargnesi/lazarus?version=latest
+.. image:: https://pypip.in/d/lazarus/badge.png
+        :target: https://crate.io/packages/lazarus?version=latest
 
 
 A Python library to restart a process when source code changes.
