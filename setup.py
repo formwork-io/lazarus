@@ -81,8 +81,8 @@ version = '0.1'
 description = 'Restart-on-change library'
 author = 'Nick Bargnesi'
 author_email = 'nick@den-4.com'
-url = 'https://bitbucket.org/nbargnesi/lazarus'
-download_url = 'https://bitbucket.org/nbargnesi/lazarus/downloads'
+url = 'https://github.com/nbargnesi/lazarus'
+download_url = 'https://github.com/nbargnesi/lazarus/releases'
 classifiers = [
     'Programming Language :: Python',
     'Programming Language :: Python :: 2',
