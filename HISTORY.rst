@@ -3,6 +3,11 @@
 History
 -------
 
+0.4 2013-10-17
+++++++++++++++
+* Fixed default mode always closing FDs.
+  https://github.com/nbargnesi/lazarus/issues/5
+
 0.3 2013-10-16
 ++++++++++++++
 

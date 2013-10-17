@@ -16,6 +16,7 @@
 
 import os
 import sys
+import lazarus
 from setuptools import setup, Command
 
 
@@ -77,7 +78,6 @@ class Check(_Command):
 name = 'lazarus'
 license = 'Apache License (2.0)'
 packages = ['lazarus']
-version = '0.3'
 description = 'Restart-on-change library'
 author = 'Nick Bargnesi'
 author_email = 'nick@den-4.com'
@@ -113,7 +113,7 @@ setup(
     },
     name=name,
     packages=packages,
-    version=version,
+    version=lazarus.__version__,
     description=description,
     author=author,
     author_email=author_email,
