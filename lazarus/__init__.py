@@ -10,12 +10,31 @@ import os
 import sys
 from . import _util
 from . import _threading
+_as_list = lambda x: list(x) if not isinstance(x, list) else x
 _active = False
+_close_fds = False
 _restart_cb = None
+_restart_func = None
 _pollthread = None
 _mgr = None
 _notifier = None
-_as_list = lambda x: list(x) if not isinstance(x, list) else x
+
+
+def _reset():
+    global _active
+    _active = False
+    global _close_fds
+    _close_fds = False
+    global _restart_cb
+    _restart_cb = None
+    global _restart_func
+    _restart_func = None
+    global _pollthread
+    _pollthread = None
+    global _mgr
+    _mgr = None
+    global _notifier
+    _notifier = None
 
 
 def check_platform():
@@ -31,6 +50,25 @@ def check_platform():
         raise RuntimeError(msg % platform)
 
 
+def stop():
+    '''Stops lazarus, regardless of which mode it was started in.
+
+    For example:
+
+        >>> import lazarus
+        >>> lazarus.default()
+        >>> lazarus.stop()
+    '''
+    global _active
+    if not _active:
+        msg = 'lazarus is not active'
+        raise RuntimeWarning(msg)
+    _pollthread.stop()
+    _pollthread.join()
+    _mgr.close()
+    _deactivate()
+
+
 def _activate():
     global _active
     if _active:
@@ -44,30 +82,38 @@ def _deactivate():
     if not _active:
         msg = 'lazarus is not active'
         raise RuntimeWarning(msg)
-    _active = False
+    _reset()
 
 
 def _restart():
+    if _restart_cb:
+        # https://github.com/nbargnesi/lazarus/issues/2
+        if _restart_cb() is not None:
+            return
     _pollthread.stop()
     _mgr.close()
-    if _restart_cb:
-        _restart_cb()
-    # close all fds...
-    _util.close_fds()
+    if _close_fds:
+        # close all fds...
+        _util.close_fds()
+
     # declare a mulligan ;)
-    _util.do_over()
+    if _restart_func:
+        _restart_func()
+        _deactivate()
+    else:
+        _util.do_over()
 
 
 def poll_restart():
     if not _active:
         msg = 'lazarus is not active'
         raise RuntimeWarning(msg)
-    while _notifier.check_events():
+    if _notifier.check_events(1):
         _notifier.read_events()
         _notifier.process_events()
 
 
-def default(restart_cb=None):
+def default(restart_cb=None, restart_func=None, close_fds=True):
     '''Sets up lazarus in default mode.
 
     See the :py:func:`custom` function for a more powerful mode of use.
@@ -77,7 +123,15 @@ def default(restart_cb=None):
 
     Keyword arguments:
 
-        restart_cb -- Callback invoked prior to restarting the process
+        restart_cb -- Callback invoked prior to restarting the process; allows
+        for any cleanup to occur prior to restarting. Returning anything other
+        than *None* in the callback will cancel the restart.
+
+        restart_func -- Function invoked to restart the process. This supplants
+        the default behavior of using *sys.executable* and *sys.argv*.
+
+        close_fds -- Whether all file descriptors other than *stdin*, *stdout*,
+        and *stderr* should be closed
 
     A simple example:
 
@@ -98,6 +152,13 @@ def default(restart_cb=None):
     if restart_cb and not callable(restart_cb):
         msg = 'restart_cb keyword argument is not callable'
         raise TypeError(msg)
+
+    if restart_func and not callable(restart_func):
+        msg = 'restart_func keyword argument is not callable'
+        raise TypeError(msg)
+
+    global _close_fds
+    _close_fds = False
 
     try:
         from pyinotify import (
@@ -129,6 +190,8 @@ def default(restart_cb=None):
     _notifier = Notifier(_mgr, _Handler(), timeout=10)
     global _restart_cb
     _restart_cb = restart_cb
+    global _restart_func
+    _restart_func = restart_func
 
     evmask = IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_TO
     _mgr.add_watch(_python_path, evmask, rec=True)
@@ -137,7 +200,7 @@ def default(restart_cb=None):
 
 
 def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
-           restart_cb=None):
+           restart_cb=None, restart_func=None, close_fds=True):
     '''Sets up lazarus in custom mode.
 
     See the :py:func:`default` function for a simpler mode of use.
@@ -158,9 +221,15 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
         recurse -- Whether to watch all subdirectories of every source path for
         changes or only the paths provided.
 
-        restart_cb -- Callback invoked prior to restarting the process. The
-        restart callback allows an application to perform any cleanup necessary
-        prior to the process being restarted.
+        restart_cb -- Callback invoked prior to restarting the process; allows
+        for any cleanup to occur prior to restarting. Returning anything other
+        than *None* in the callback will cancel the restart.
+
+        restart_func -- Function invoked to restart the process. This supplants
+        the default behavior of using *sys.executable* and *sys.argv*.
+
+        close_fds -- Whether all file descriptors other than *stdin*, *stdout*,
+        and *stderr* should be closed
 
     An example of using a cleanup function prior to restarting:
 
@@ -188,6 +257,13 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
     if restart_cb and not callable(restart_cb):
         msg = 'restart_cb keyword argument is not callable'
         raise TypeError(msg)
+
+    if restart_func and not callable(restart_func):
+        msg = 'restart_func keyword argument is not callable'
+        raise TypeError(msg)
+
+    global _close_fds
+    _close_fds = close_fds
 
     try:
         from pyinotify import (
@@ -238,17 +314,3 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
         _mgr.add_watch(srcpath, evmask, **kwargs)
     _activate()
     _pollthread.start()
-
-
-def stop():
-    '''Stops lazarus, regardless of which mode it was started in.
-
-    For example:
-
-        >>> import lazarus
-        >>> lazarus.default()
-        >>> lazarus.stop()
-    '''
-    _pollthread.stop()
-    _mgr.close()
-    _deactivate()
