@@ -4,7 +4,7 @@ lazarus
 
 .. image:: https://badge.fury.io/py/lazarus.png
     :target: http://badge.fury.io/py/lazarus
-    
+
 .. image:: https://travis-ci.org/nbargnesi/lazarus.png?branch=master
         :target: https://travis-ci.org/nbargnesi/lazarus
 
@@ -20,5 +20,15 @@ A Python library to restart a process when source code changes.
 Features
 --------
 
-* TODO
+* Automatically restart when things change
+* Customize when, why, and how restarts happen
 
+Example
+-------
+
+Restart when any Python module rooted at ``PYTHONPATH`` changes:
+
+.. sourcecode:: python
+
+    >>> import lazarus
+    >>> lazarus.default()
