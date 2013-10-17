@@ -158,7 +158,7 @@ def default(restart_cb=None, restart_func=None, close_fds=True):
         raise TypeError(msg)
 
     global _close_fds
-    _close_fds = False
+    _close_fds = close_fds
 
     try:
         from pyinotify import (
