@@ -64,4 +64,3 @@ class TestLazarus(unittest.TestCase):
 
         # ... and lazarus has not stopped
         self.assertEquals(True, lazarus._active)
-
