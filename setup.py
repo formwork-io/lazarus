@@ -34,21 +34,18 @@ class PEP8(_Command):
     description = 'PEP8 analysis'
 
     def run(self):
-        os.system('scripts/pep8.sh')
+        code = os.system('scripts/pep8.sh')
+        if code != 0:
+            sys.exit(1)
 
 
 class Pyflakes(_Command):
     description = 'Pyflakes analysis'
 
     def run(self):
-        os.system('scripts/pyflakes.sh')
-
-
-class Docs(_Command):
-    description = 'Generate documentation'
-
-    def run(self):
-        os.system('scripts/docs.sh')
+        code = os.system('scripts/pyflakes.sh')
+        if code != 0:
+            sys.exit(1)
 
 
 class Test(_Command):
@@ -66,7 +63,6 @@ class Check(_Command):
         codes.append(os.system('scripts/pep8.sh'))
         codes.append(os.system('scripts/pyflakes.sh'))
         codes.append(os.system('scripts/test.sh'))
-        codes.append(os.system('scripts/docs.sh'))
         if any([code != 0 for code in codes]):
             sys.stderr.write('One or more checks have failed.\n')
             sys.stderr.flush()
@@ -108,7 +104,6 @@ setup(
     cmdclass={
         'pep8': PEP8,
         'pyflakes': Pyflakes,
-        'docs': Docs,
         'test': Test,
         'allchecks': Check
     },
