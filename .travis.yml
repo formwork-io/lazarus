@@ -6,7 +6,14 @@ python:
   - "3.3"
   - "2.7"
 
-install: pip install -r requirements.txt
+install:
+    - pip install -r requirements.txt
+    - pip install coveralls --use-mirrors
 
 # command to run tests, e.g. python setup.py test
-script: python setup.py allchecks
+script:
+    - python setup.py allchecks
+    - coverage run --source=lazarus setup.py test
+
+after_success:
+    coveralls
