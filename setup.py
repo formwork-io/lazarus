@@ -70,6 +70,7 @@ class Check(_Command):
         if any([code != 0 for code in codes]):
             sys.stderr.write('One or more checks have failed.\n')
             sys.stderr.flush()
+            sys.exit(1)
         else:
             sys.stdout.write('All checks have passed.\n')
             sys.stdout.flush()
