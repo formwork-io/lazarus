@@ -8,12 +8,11 @@ python:
 
 install:
     - pip install -r requirements.txt
-    - pip install coveralls pep8 pyflakes --use-mirrors
+    - pip install coverage coveralls pep8 pyflakes --use-mirrors
 
 # command to run tests, e.g. python setup.py test
 script:
     - python setup.py allchecks
-    - coverage run --source=lazarus setup.py test
 
 after_success:
     coveralls
