@@ -26,8 +26,8 @@ Features
 * Automatically restart when things change
 * Customize when, why, and how restarts happen
 
-Example
--------
+Examples
+--------
 
 Restart when any Python module rooted at ``PYTHONPATH`` changes:
 
@@ -35,3 +35,12 @@ Restart when any Python module rooted at ``PYTHONPATH`` changes:
 
     >>> import lazarus
     >>> lazarus.default()
+
+
+Same thing, but within a uWSGI container:
+
+.. sourcecode:: python
+
+    >>> import lazarus
+    >>> lazarus.default(restart_func=lambda: uwsgi.reload(), close_fds=False)
+

@@ -3,6 +3,11 @@
 History
 -------
 
+0.5 2013-10-17
+++++++++++++++
+
+* Released to PyPI
+
 0.4 2013-10-17
 ++++++++++++++
 
@@ -27,3 +32,4 @@ History
 .. _#5: https://github.com/nbargnesi/lazarus/issues/5
 .. _#2: https://github.com/nbargnesi/lazarus/issues/2
 .. _#1: https://github.com/nbargnesi/lazarus/issues/1
+
