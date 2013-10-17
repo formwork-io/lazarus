@@ -179,6 +179,8 @@ def default(restart_cb=None, restart_func=None, close_fds=True):
             ProcessEvent.__init__(self)
 
         def process_default(self, event):
+            if not _active:
+                return
             if event.name.endswith('.py'):
                 _restart()
 
@@ -284,6 +286,8 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
             ProcessEvent.__init__(self)
 
         def process_default(self, event):
+            if not _active:
+                return
 
             # if caller wants event_cb control, defer _restart logic to them
             if event_cb:
