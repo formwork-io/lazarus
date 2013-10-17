@@ -15,6 +15,7 @@ script:
     - python setup.py pep8
     - python setup.py pyflakes
     - coverage run --source=lazarus setup.py test
+    - coverage report -m
 
 after_success:
-    coveralls
+    coveralls --verbose
