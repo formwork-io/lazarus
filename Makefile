@@ -15,7 +15,7 @@ help:
 check:
 	python setup.py check
 
-clean: clean-build clean-pyc
+clean: clean-build clean-pyc clean-docs
 
 clean-build:
 	rm -fr build/
@@ -26,6 +26,9 @@ clean-pyc:
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
+
+clean-docs:
+	$(MAKE) -C docs clean
 
 pep8:
 	python setup.py pep8
