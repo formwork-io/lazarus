@@ -77,7 +77,7 @@ class Check(_Command):
 name = 'lazarus'
 license = 'Apache License (2.0)'
 packages = ['lazarus']
-version = '0.2'
+version = '0.3'
 description = 'Restart-on-change library'
 author = 'Nick Bargnesi'
 author_email = 'nick@den-4.com'
