@@ -20,12 +20,12 @@ class TestLazarus(unittest.TestCase):
         self.assertFalse(lazarus._active)
         self.called = False
 
-        def _restart_func():
+        def _func():
             self.called = True
 
-        lazarus.default(restart_func=_restart_func)
+        lazarus.default(restart_func=_func, close_fds=False)
         self.assertTrue(lazarus._active)
-        self.assertEquals(_restart_func, lazarus._restart_func)
+        self.assertEquals(_func, lazarus._restart_func)
         os.system('touch %s' % __file__)
         time.sleep(1.25)
 
@@ -46,16 +46,16 @@ class TestLazarus(unittest.TestCase):
         self.assertFalse(lazarus._active)
         self.called = False
 
-        def _restart_func():
+        def _func():
             self.called = True
 
-        def _restart_cb():
+        def _cb():
             return False
 
-        lazarus.default(restart_func=_restart_func, restart_cb=_restart_cb)
+        lazarus.default(restart_func=_func, restart_cb=_cb, close_fds=False)
         self.assertTrue(lazarus._active)
-        self.assertEquals(_restart_func, lazarus._restart_func)
-        self.assertEquals(_restart_cb, lazarus._restart_cb)
+        self.assertEquals(_func, lazarus._restart_func)
+        self.assertEquals(_cb, lazarus._restart_cb)
         os.system('touch %s' % __file__)
         time.sleep(1.25)
 
