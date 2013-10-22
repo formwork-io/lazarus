@@ -12,10 +12,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
-    - python setup.py pep8
-    - python setup.py pyflakes
-    - coverage run --source=lazarus setup.py test
-    - coverage report -m
+    - scripts/travis.sh
 
 after_success:
     coveralls --verbose
