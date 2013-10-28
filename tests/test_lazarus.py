@@ -15,9 +15,14 @@ class TestLazarus(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
+    def setUp(self):
+        self.assertFalse(lazarus._active)
+
+    def tearDown(self):
+        self.assertFalse(lazarus._active)
+
     def test_issue1(self):
         '''Test providing restart command (issue #1)'''
-        self.assertFalse(lazarus._active)
         self.called = False
 
         def _func():
@@ -43,7 +48,6 @@ class TestLazarus(unittest.TestCase):
 
     def test_issue2(self):
         '''Test cancelling restart (issue #2)'''
-        self.assertFalse(lazarus._active)
         self.called = False
 
         def _func():
@@ -64,3 +68,4 @@ class TestLazarus(unittest.TestCase):
 
         # ... and lazarus has not stopped
         self.assertEquals(True, lazarus._active)
+        lazarus.stop()

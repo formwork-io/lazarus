@@ -8,9 +8,6 @@ lazarus
 .. image:: https://travis-ci.org/nbargnesi/lazarus.png?branch=master
         :target: https://travis-ci.org/nbargnesi/lazarus
 
-.. image:: https://coveralls.io/repos/nbargnesi/lazarus/badge.png?branch=master
-        :target: https://coveralls.io/r/nbargnesi/lazarus?branch=master
-
 .. image:: https://pypip.in/d/lazarus/badge.png
         :target: https://crate.io/packages/lazarus?version=latest
 

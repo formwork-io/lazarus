@@ -4,5 +4,7 @@
 #
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"/../
 cd "${DIR}" || exit 1
-make clean docs || exit 1
+python setup.py pep8 || exit 1
+python setup.py pyflakes || exit 1
+./scripts/test.sh || exit 1
 
