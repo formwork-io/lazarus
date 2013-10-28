@@ -7,5 +7,4 @@ cd "${DIR}" || exit 1
 python setup.py pep8 || exit 1
 python setup.py pyflakes || exit 1
 ./scripts/test.sh || exit 1
-coverage report -m || exit 1
 
