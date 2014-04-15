@@ -3,6 +3,7 @@ import os
 import time
 import lazarus
 import unittest
+import threading
 
 
 class TestLazarus(unittest.TestCase):
@@ -23,19 +24,19 @@ class TestLazarus(unittest.TestCase):
 
     def test_issue1(self):
         '''Test providing restart command (issue #1)'''
-        self.called = False
+        ev = threading.Event()
 
         def _func():
-            self.called = True
+            ev.set()
 
         lazarus.default(restart_func=_func, close_fds=False)
         self.assertTrue(lazarus._active)
         self.assertEquals(_func, lazarus._restart_func)
-        os.system('touch %s' % __file__)
-        time.sleep(1.25)
+        es = os.system('touch %s' % __file__)
+        self.assertEquals(0, es)
 
         # assert the restart function was invoked...
-        self.assertTrue(self.called)
+        self.assertTrue(ev.wait(5), 'restart function not called')
 
         # ... and lazarus has stopped
         self.assertEquals(False, lazarus._active)
@@ -48,10 +49,10 @@ class TestLazarus(unittest.TestCase):
 
     def test_issue2(self):
         '''Test cancelling restart (issue #2)'''
-        self.called = False
+        ev = threading.Event()
 
         def _func():
-            self.called = True
+            ev.set()
 
         def _cb():
             return False
@@ -60,11 +61,11 @@ class TestLazarus(unittest.TestCase):
         self.assertTrue(lazarus._active)
         self.assertEquals(_func, lazarus._restart_func)
         self.assertEquals(_cb, lazarus._restart_cb)
-        os.system('touch %s' % __file__)
-        time.sleep(1.25)
+        es = os.system('touch %s' % __file__)
+        self.assertEquals(0, es)
 
         # assert the restart function was not invoked...
-        self.assertFalse(self.called)
+        self.assertFalse(ev.wait(5), 'restart function not called')
 
         # ... and lazarus has not stopped
         self.assertEquals(True, lazarus._active)
