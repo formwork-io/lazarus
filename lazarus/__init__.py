@@ -5,7 +5,7 @@ Progress doesn't come from early risers - progress is made by lazy men looking
 for easier ways to do things.
 '''
 
-__version__ = '0.5'
+__version__ = '0.5.1'
 import os
 import sys
 from . import _util
@@ -87,7 +87,7 @@ def _deactivate():
 
 def _restart():
     if _restart_cb:
-        # https://github.com/nbargnesi/lazarus/issues/2
+        # https://github.com/formwork-io/lazarus/issues/2
         if _restart_cb() is not None:
             return
     _pollthread.stop()

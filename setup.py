@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-# Copyright 2013 Nick Bargnesi
+# Copyright 2013-2014 Nick Bargnesi
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -78,8 +78,8 @@ packages = ['lazarus']
 description = 'Restart-on-change library'
 author = 'Nick Bargnesi'
 author_email = 'nick@den-4.com'
-url = 'https://github.com/nbargnesi/lazarus'
-download_url = 'https://github.com/nbargnesi/lazarus/releases'
+url = 'https://github.com/formwork-io/lazarus'
+download_url = 'https://github.com/formwork-io/lazarus/releases'
 classifiers = [
     'Programming Language :: Python',
     'Programming Language :: Python :: 2',

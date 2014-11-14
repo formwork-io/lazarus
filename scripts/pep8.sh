@@ -8,7 +8,7 @@ echo "Running pep8 check."
 
 PEP8_OPTS+="--show-source "
 PEP8_OPTS+="--count "
-PEP8_OPTS+=" . lazarus tests "
+PEP8_OPTS+=" lazarus tests "
 
 pep8 $PEP8_OPTS
 
