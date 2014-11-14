@@ -5,7 +5,7 @@ Progress doesn't come from early risers - progress is made by lazy men looking
 for easier ways to do things.
 '''
 
-__version__ = '0.6-dev'
+__version__ = '0.5.1'
 import os
 import sys
 from . import _util
