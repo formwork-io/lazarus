@@ -87,7 +87,7 @@ def _deactivate():
 
 def _restart():
     if _restart_cb:
-        # https://github.com/nbargnesi/lazarus/issues/2
+        # https://github.com/formwork-io/lazarus/issues/2
         if _restart_cb() is not None:
             return
     _pollthread.stop()
