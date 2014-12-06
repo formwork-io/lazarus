@@ -5,19 +5,15 @@ Progress doesn't come from early risers - progress is made by lazy men looking
 for easier ways to do things.
 '''
 
-__version__ = '0.5.1'
+__version__ = '0.6.0'
 import os
-import sys
 from . import _util
-from . import _threading
-_as_list = lambda x: list(x) if not isinstance(x, list) else x
+_as_list = lambda x: [x] if not isinstance(x, list) else x
 _active = False
 _close_fds = False
 _restart_cb = None
 _restart_func = None
-_pollthread = None
-_mgr = None
-_notifier = None
+_observer = None
 
 
 def _reset():
@@ -29,25 +25,8 @@ def _reset():
     _restart_cb = None
     global _restart_func
     _restart_func = None
-    global _pollthread
-    _pollthread = None
-    global _mgr
-    _mgr = None
-    global _notifier
-    _notifier = None
-
-
-def check_platform():
-    '''Checks the platform is Linux.
-
-    For example:
-
-        >>> check_platform()
-    '''
-    platform = sys.platform
-    if not platform.startswith('linux'):
-        msg = '%s: unsupported platform'
-        raise RuntimeError(msg % platform)
+    global _observer
+    _observer = None
 
 
 def stop():
@@ -63,9 +42,8 @@ def stop():
     if not _active:
         msg = 'lazarus is not active'
         raise RuntimeWarning(msg)
-    _pollthread.stop()
-    _pollthread.join()
-    _mgr.close()
+    _observer.stop()
+    _observer.join()
     _deactivate()
 
 
@@ -86,31 +64,30 @@ def _deactivate():
 
 
 def _restart():
+    '''Schedule the restart; returning True if cancelled, False otherwise.'''
     if _restart_cb:
         # https://github.com/formwork-io/lazarus/issues/2
         if _restart_cb() is not None:
-            return
-    _pollthread.stop()
-    _mgr.close()
-    if _close_fds:
-        # close all fds...
-        _util.close_fds()
+            # restart cancelled
+            return True
 
-    # declare a mulligan ;)
-    if _restart_func:
-        _restart_func()
-        _deactivate()
-    else:
-        _util.do_over()
+    def down_watchdog():
+        _observer.stop()
+        _observer.join()
 
+        if _close_fds:
+            # close all fds...
+            _util.close_fds()
 
-def poll_restart():
-    if not _active:
-        msg = 'lazarus is not active'
-        raise RuntimeWarning(msg)
-    if _notifier.check_events(1):
-        _notifier.read_events()
-        _notifier.process_events()
+        # declare a mulligan ;)
+        if _restart_func:
+            _restart_func()
+            _deactivate()
+        else:
+            _util.do_over()
+
+    _util.defer(down_watchdog)
+    return False
 
 
 def default(restart_cb=None, restart_func=None, close_fds=True):
@@ -139,7 +116,6 @@ def default(restart_cb=None, restart_func=None, close_fds=True):
         >>> lazarus.default()
         >>> lazarus.stop()
     '''
-    check_platform()
     if _active:
         msg = 'lazarus is already active'
         raise RuntimeWarning(msg)
@@ -161,44 +137,51 @@ def default(restart_cb=None, restart_func=None, close_fds=True):
     _close_fds = close_fds
 
     try:
-        from pyinotify import (
-            ProcessEvent,
-            WatchManager,
-            Notifier,
-            IN_MODIFY,
-            IN_CLOSE_WRITE,
-            IN_CREATE,
-            IN_MOVED_TO
-        )
+        from watchdog.observers import Observer
+        from watchdog.events import FileSystemEventHandler
     except ImportError as ie:
-        msg = 'no pyinotify support (%s)' % str(ie)
+        msg = 'no watchdog support (%s)' % str(ie)
         raise RuntimeError(msg)
 
-    class _Handler(ProcessEvent):
+    class _Handler(FileSystemEventHandler):
+
         def __init__(self):
-            ProcessEvent.__init__(self)
+            self.active = True
 
-        def process_default(self, event):
-            if not _active:
+        def dispatch(self, event):
+            if not self.active:
                 return
-            if event.name.endswith('.py'):
-                _restart()
+            super().dispatch(event)
 
-    global _pollthread
-    _pollthread = _threading.PollThread(poll_restart)
-    global _mgr
-    _mgr = WatchManager()
-    global _notifier
-    _notifier = Notifier(_mgr, _Handler(), timeout=10)
+        def all_events(self, event):
+            if event.src_path.endswith('.py'):
+                cancelled = _restart()
+                if not cancelled:
+                    self.active = False
+
+        def on_created(self, event):
+            self.all_events(event)
+
+        def on_deleted(self, event):
+            self.all_events(event)
+
+        def on_modified(self, event):
+            self.all_events(event)
+
+        def on_moved(self, event):
+            self.all_events(event)
+
+    global _observer
+    _observer = Observer()
+    handler = _Handler()
+    _observer.schedule(handler, _python_path, recursive=True)
     global _restart_cb
     _restart_cb = restart_cb
     global _restart_func
     _restart_func = restart_func
 
-    evmask = IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_TO
-    _mgr.add_watch(_python_path, evmask, rec=True)
     _activate()
-    _pollthread.start()
+    _observer.start()
 
 
 def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
@@ -244,14 +227,13 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
     An example of avoiding restarts when any ``__main__.py`` changes:
 
         >>> def skip_main(event):
-        ...     if event.name == '__main__.py':
+        ...     if event.src_path == '__main__.py':
         ...         return False
         ...     return True
         >>> import lazarus
         >>> lazarus.custom(os.curdir, event_cb=skip_main)
         >>> lazarus.stop()
     '''
-    check_platform()
     if _active:
         msg = 'lazarus is already active'
         raise RuntimeWarning(msg)
@@ -268,53 +250,61 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
     _close_fds = close_fds
 
     try:
-        from pyinotify import (
-            ProcessEvent,
-            WatchManager,
-            Notifier,
-            IN_MODIFY,
-            IN_CLOSE_WRITE,
-            IN_CREATE,
-            IN_MOVED_TO
-        )
+        from watchdog.observers import Observer
+        from watchdog.events import FileSystemEventHandler
     except ImportError as ie:
-        msg = 'no pyinotify support (%s)' % str(ie)
+        msg = 'no watchdog support (%s)' % str(ie)
         raise RuntimeError(msg)
 
-    class _Handler(ProcessEvent):
+    class _Handler(FileSystemEventHandler):
+
         def __init__(self):
-            ProcessEvent.__init__(self)
+            self.active = True
 
-        def process_default(self, event):
-            if not _active:
+        def dispatch(self, event):
+            if not self.active:
                 return
+            super().dispatch(event)
 
+        def all_events(self, event):
             # if caller wants event_cb control, defer _restart logic to them
             if event_cb:
                 if event_cb(event):
-                    _restart()
-                return
+                    cancelled = _restart()
+                    if not cancelled:
+                        self.active = False
+            else:
+                # default logic; _restart on .py events
+                if event.src_path.endswith('.py'):
+                    cancelled = _restart()
+                    if not cancelled:
+                        self.active = False
+                    self.active = False
 
-            # default logic; _restart on .py events
-            if event.name.endswith('.py'):
-                _restart()
+        def on_created(self, event):
+            self.all_events(event)
 
-    global _pollthread
-    kwargs = {'poll_interval': poll_interval}
-    _pollthread = _threading.PollThread(poll_restart, **kwargs)
-    global _mgr
-    _mgr = WatchManager()
-    global _notifier
-    _notifier = Notifier(_mgr, _Handler(), timeout=10)
+        def on_deleted(self, event):
+            self.all_events(event)
+
+        def on_modified(self, event):
+            self.all_events(event)
+
+        def on_moved(self, event):
+            self.all_events(event)
+
+    global _observer
+    kwargs = {'timeout': poll_interval}
+    _observer = Observer(**kwargs)
     global _restart_cb
     _restart_cb = restart_cb
 
-    evmask = IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_TO
+    handler = _Handler()
     srcpaths = _as_list(srcpaths)
     kwargs = {}
     if recurse:
-        kwargs['rec'] = True
+        kwargs['recursive'] = True
     for srcpath in srcpaths:
-        _mgr.add_watch(srcpath, evmask, **kwargs)
+        _observer.schedule(handler, srcpath, **kwargs)
     _activate()
-    _pollthread.start()
+    _observer.start()

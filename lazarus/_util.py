@@ -4,8 +4,26 @@
 #
 import os
 import sys
+import threading
 import contextlib
-_fd_dir = '/proc/self/fd'
+import concurrent.futures as futures
+from functools import partial
+SingleExec = partial(futures.ThreadPoolExecutor, max_workers=1)
+
+
+def defer(callable):
+    '''Defers execution of the callable to a thread.
+
+    For example:
+
+        >>> def foo():
+        ...     print('bar')
+        >>> join = defer(foo)
+        >>> join()
+    '''
+    t = threading.Thread(target=callable)
+    t.start()
+    return t.join
 
 
 @contextlib.contextmanager
@@ -31,13 +49,31 @@ def ignored(*exceptions):
 
 
 def close_fds():
-    '''Closes open file descriptors other than stdin, stdout, and stderr.'''
-    if not os.path.exists(_fd_dir):
-        return
-    fds = set(map(int, os.listdir(_fd_dir)))
-    for x in (fds - {0, 1, 2}):
-        with ignored(OSError):
-            os.close(x)
+    '''Closes open file descriptors other than stdin, stdout, and stderr.
+
+    .. note::
+
+        On Mac, /dev/fd/3 is a private, per-process filesystem namespace
+        representing the already opened descriptor for a script interpreter.
+
+        See http://www.sysnet.ucsd.edu/sysnet/miscpapers/tsyrklevich.pdf
+        and http://perldoc.perl.org/perlsec.html
+    '''
+    if sys.platform == 'linux':
+        fd_dir = '/proc/self/fd'
+        fds = set(map(int, os.listdir(fd_dir)))
+        for x in (fds - {0, 1, 2}):
+            with ignored(OSError):
+                os.close(x)
+    elif sys.platform == 'darwin':
+        fd_dir = '/dev/fd'
+        fds = set(map(int, os.listdir(fd_dir)))
+        for x in (fds - {0, 1, 2, 3}):
+            print(x)
+            with ignored(OSError):
+                print(os.fstat(x))
+            with ignored(OSError):
+                os.close(x)
 
 
 def do_over():
