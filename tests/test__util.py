@@ -24,20 +24,6 @@ class TestUtilFuncs(unittest.TestCase):
             called = True
         self.assertFalse(called)
 
-    def test_close_fds(self):
-        global called
-        called = False
-
-        def _close(x):
-            global called
-            called = True
-
-        close = os.close
-        os.close = _close
-        lazarus._util.close_fds()
-        self.assertTrue(called)
-        os.close = close
-
     def test_do_over(self):
         global called
         called = False
