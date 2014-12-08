@@ -36,10 +36,18 @@ if not fd:
 
 sys.stdout.write('Checking for watchdog... ')
 try:
-    import watchdog
+    import watchdog.observers
     print('yes')
 except ImportError as ie:
     print('no (%s)' % str(ie))
+    compat = False
+
+sys.stdout.write('Checking for API compatibility... ')
+try:
+    watchdog.observers.Observer
+    print('yes')
+except AttributeError as ae:
+    print('no (%s)' % str(ae))
     compat = False
 
 if compat:
