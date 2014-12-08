@@ -151,7 +151,7 @@ def default(restart_cb=None, restart_func=None, close_fds=True):
         def dispatch(self, event):
             if not self.active:
                 return
-            super().dispatch(event)
+            super(_Handler, self).dispatch(event)
 
         def all_events(self, event):
             if event.src_path.endswith('.py'):
@@ -264,7 +264,7 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
         def dispatch(self, event):
             if not self.active:
                 return
-            super().dispatch(event)
+            super(_Handler, self).dispatch(event)
 
         def all_events(self, event):
             # if caller wants event_cb control, defer _restart logic to them
