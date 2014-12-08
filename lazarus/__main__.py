@@ -14,39 +14,40 @@ Executing compatiblity check.\
 '''
 print(msg)
 
+fd = False
 compat = True
 
 sys.stdout.write('Checking for /proc/self/fd... ')
 if os.path.exists('/proc/self/fd'):
     print('yes')
+    fd = True
 else:
     print('no')
+
+sys.stdout.write('Checking for /dev/fd... ')
+if os.path.exists('/dev/fd'):
+    print('yes')
+    fd = True
+else:
+    print('no')
+
+if not fd:
     compat = False
 
-sys.stdout.write('Checking for pyinotify... ')
+sys.stdout.write('Checking for watchdog... ')
 try:
-    import pyinotify
+    import watchdog.observers
     print('yes')
-
-    sys.stdout.write('Checking pyinotify API compatibility... ')
-    reqs = [
-        'ProcessEvent',
-        'WatchManager',
-        'Notifier',
-        'IN_MODIFY',
-        'IN_CLOSE_WRITE',
-        'IN_CREATE',
-        'IN_MOVED_TO'
-    ]
-    mod = dir(pyinotify)
-    if all([req in mod for req in reqs]):
-        print('yes')
-    else:
-        print('no')
-        compat = False
-
 except ImportError as ie:
     print('no (%s)' % str(ie))
+    compat = False
+
+sys.stdout.write('Checking for API compatibility... ')
+try:
+    watchdog.observers.Observer
+    print('yes')
+except AttributeError as ae:
+    print('no (%s)' % str(ae))
     compat = False
 
 if compat:

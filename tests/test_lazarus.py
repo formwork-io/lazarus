@@ -1,6 +1,5 @@
 # coding: utf-8
 import os
-import time
 import lazarus
 import unittest
 import threading
@@ -43,9 +42,6 @@ class TestLazarus(unittest.TestCase):
         self.assertEquals(False, lazarus._close_fds)
         self.assertEquals(None, lazarus._restart_cb)
         self.assertEquals(None, lazarus._restart_func)
-        self.assertEquals(None, lazarus._pollthread)
-        self.assertEquals(None, lazarus._mgr)
-        self.assertEquals(None, lazarus._notifier)
 
     def test_issue2(self):
         '''Test cancelling restart (issue #2)'''

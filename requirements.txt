@@ -1,2 +1,2 @@
-pyinotify>=0.9.4
+watchdog>=0.8.2
 

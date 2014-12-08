@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'lazarus'
-copyright = u'2013, Nick Bargnesi'
+copyright = u'2013-2014, Lazarus Authors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -202,7 +202,7 @@ latex_documents = [
         'index',
         'lazarus.tex',
         u'Lazarus Documentation',
-        u'Nick Bargnesi', 'manual'
+        u'Lazarus Authors', 'manual'
     )
 ]
 
@@ -231,7 +231,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'lazarus', u'Lazarus Documentation',
-     [u'Nick Bargnesi'], 1)
+     [u'Lazarus Authors'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -246,7 +246,7 @@ texinfo_documents = [
         'index',
         'lazarus',
         u'Lazarus Documentation',
-        u'Nick Bargnesi',
+        u'Lazarus Authors',
         'lazarus',
         'One line description of project.',
         'Miscellaneous'

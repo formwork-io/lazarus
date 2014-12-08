@@ -81,17 +81,20 @@ author_email = 'nick@den-4.com'
 url = 'https://github.com/formwork-io/lazarus'
 download_url = 'https://github.com/formwork-io/lazarus/releases'
 classifiers = [
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 3',
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
+    'Intended Audience :: Information Technology',
+    'Intended Audience :: System Administrators',
     'License :: OSI Approved :: Apache Software License',
+    'Operating System :: MacOS :: MacOS X',
     'Operating System :: POSIX :: Linux',
+    'Programming Language :: Python :: 3',
     'Topic :: Software Development :: Libraries :: Python Modules',
+    'Topic :: System :: Monitoring',
+    'Topic :: Utilities'
 ]
 install_requires = [
-    'pyinotify >= 0.9.4'
+    'watchdog >= 0.8.2'
 ]
 long_description = '''\
 Lazarus
