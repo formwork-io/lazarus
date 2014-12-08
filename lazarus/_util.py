@@ -6,9 +6,6 @@ import os
 import sys
 import threading
 import contextlib
-import concurrent.futures as futures
-from functools import partial
-SingleExec = partial(futures.ThreadPoolExecutor, max_workers=1)
 
 
 def defer(callable):
