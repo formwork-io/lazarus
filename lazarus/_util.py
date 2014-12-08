@@ -49,31 +49,33 @@ def ignored(*exceptions):
 
 
 def close_fds():
-    '''Closes open file descriptors other than stdin, stdout, and stderr.
+    '''Close extraneous file descriptors.
 
-    .. note::
-
-        On Mac, /dev/fd/3 is a private, per-process filesystem namespace
-        representing the already opened descriptor for a script interpreter.
-
-        See http://www.sysnet.ucsd.edu/sysnet/miscpapers/tsyrklevich.pdf
-        and http://perldoc.perl.org/perlsec.html
+    On Linux, close everything but stdin, stdout, and stderr. On Mac, close
+    stdin, stdout, and stderr and everything owned by our user id.
     '''
+    def close(fd):
+        with ignored(OSError):
+            os.close(fd)
+
     if sys.platform == 'linux':
         fd_dir = '/proc/self/fd'
         fds = set(map(int, os.listdir(fd_dir)))
         for x in (fds - {0, 1, 2}):
-            with ignored(OSError):
-                os.close(x)
+            close(x)
+
     elif sys.platform == 'darwin':
+        uid = os.getuid()
         fd_dir = '/dev/fd'
         fds = set(map(int, os.listdir(fd_dir)))
-        for x in (fds - {0, 1, 2, 3}):
-            print(x)
-            with ignored(OSError):
-                print(os.fstat(x))
-            with ignored(OSError):
-                os.close(x)
+        for x in (fds - {0, 1, 2}):
+            path = '/dev/fd/' + str(x)
+            if not os.access(path, os.R_OK):
+                continue
+            stat = os.fstat(x)
+            if stat.st_uid != uid:
+                continue
+            close(x)
 
 
 def do_over():
