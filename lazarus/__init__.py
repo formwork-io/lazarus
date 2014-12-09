@@ -5,7 +5,7 @@ Progress doesn't come from early risers - progress is made by lazy men looking
 for easier ways to do things.
 '''
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 import os
 from . import _util
 _as_list = lambda x: [x] if not isinstance(x, list) else x
@@ -90,6 +90,32 @@ def _restart():
     return False
 
 
+def is_restart_event(event):
+    '''Default logic for whether a filesystem event is a *restart event*.
+
+    For example:
+
+        >>> import collections
+        >>> Event = collections.namedtuple('Event', 'src_path dest_path')
+        >>> vim_ev = Event('foo.py', None)
+        >>> is_restart_event(vim_ev)
+        True
+        >>> sublime_ev = Event('.subl6f0.tmp', '__main__.py')
+        >>> is_restart_event(sublime_ev)
+        True
+
+    If the event's source or destination path ends in ``.py``, the event is
+    considered a *restart event*. This covers most cases where a restart
+    should take place like developers using editors, IDEs, or version control
+    operations.
+    '''
+    if event.src_path.endswith('.py'):
+        return True
+    elif hasattr(event, 'dest_path') and event.dest_path.endswith('.py'):
+        return True
+    return False
+
+
 def default(restart_cb=None, restart_func=None, close_fds=True):
     '''Sets up lazarus in default mode.
 
@@ -154,7 +180,7 @@ def default(restart_cb=None, restart_func=None, close_fds=True):
             super(_Handler, self).dispatch(event)
 
         def all_events(self, event):
-            if event.src_path.endswith('.py'):
+            if is_restart_event(event):
                 cancelled = _restart()
                 if not cancelled:
                     self.active = False
@@ -268,18 +294,19 @@ def custom(srcpaths, event_cb=None, poll_interval=1, recurse=True,
 
         def all_events(self, event):
             # if caller wants event_cb control, defer _restart logic to them
+            # (caller decides whether this is a restart event)
             if event_cb:
                 if event_cb(event):
                     cancelled = _restart()
                     if not cancelled:
                         self.active = False
-            else:
-                # default logic; _restart on .py events
-                if event.src_path.endswith('.py'):
-                    cancelled = _restart()
-                    if not cancelled:
-                        self.active = False
+
+            # use default is_restart_event logic
+            elif is_restart_event(event):
+                cancelled = _restart()
+                if not cancelled:
                     self.active = False
+                self.active = False
 
         def on_created(self, event):
             self.all_events(event)
