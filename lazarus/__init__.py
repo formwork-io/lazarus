@@ -5,7 +5,7 @@ Progress doesn't come from early risers - progress is made by lazy men looking
 for easier ways to do things.
 '''
 
-__version__ = '0.6.2'
+__version__ = '0.6.3'
 import os
 from . import _util
 _as_list = lambda x: [x] if not isinstance(x, list) else x
