@@ -18,6 +18,7 @@ import os
 import sys
 import lazarus
 from setuptools import setup, Command
+from codecs import open
 
 
 class _Command(Command):
