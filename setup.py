@@ -103,6 +103,11 @@ Lazarus
 A library that restarts the process when source code changes.
 '''
 
+with open('README.rst', 'r', 'utf-8') as f:
+    readme = f.read()
+with open('HISTORY.rst', 'r', 'utf-8') as f:
+    history = f.read()
+
 setup(
     cmdclass={
         'pep8': PEP8,
@@ -110,6 +115,7 @@ setup(
         'test': Test,
         'allchecks': Check
     },
+    license=license,
     name=name,
     packages=packages,
     version=lazarus.__version__,
@@ -120,5 +126,7 @@ setup(
     download_url=download_url,
     classifiers=classifiers,
     install_requires=install_requires,
-    long_description=long_description
+    long_description=readme + '\n\n' + history,
+    package_data={'': ['LICENSE']},
+    include_package_data=True
 )

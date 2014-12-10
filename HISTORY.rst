@@ -3,6 +3,21 @@
 History
 -------
 
+0.6.3 2014-12-10
+++++++++++++++++
+
+* Expanded PyPI package page.
+
+0.6.2 2014-12-09
+++++++++++++++++
+
+* Fixed Sublime Text save workflows.
+
+0.6.1 2014-12-07
+++++++++++++++++
+
+* Added Mac Support.
+
 0.5.1 2014-11-13
 ++++++++++++++++
 

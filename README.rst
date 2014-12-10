@@ -1,8 +1,20 @@
 =======
-lazarus
+Lazarus
 =======
 
-A Python library to restart a process when source code changes.
+.. image:: https://img.shields.io/pypi/v/lazarus.svg
+    :target: https://pypi.python.org/pypi/lazarus
+
+.. image:: https://img.shields.io/pypi/l/lazarus.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0.txt
+
+.. image:: https://scrutinizer-ci.com/g/formwork-io/lazarus/badges/quality-score.png?b=master
+    :target: https://scrutinizer-ci.com
+
+.. image:: https://img.shields.io/travis/formwork-io/lazarus.svg
+    :target: https://travis-ci.org/formwork-io/lazarus
+
+A Python library to restart the process when source code changes.
 
 * Free software: Apache License, Version 2.0
 * Documentation: http://lazarus.rtfd.org.
@@ -10,8 +22,9 @@ A Python library to restart a process when source code changes.
 Features
 --------
 
-* Automatically restart when things change
+* Automatically restart when source changes
 * Customize when, why, and how restarts happen
+* Runs on Linux and Mac
 
 Examples
 --------
